@@ -1,53 +1,17 @@
 const express = require('express');
-const { ApolloServer, gql } = require('apollo-server-express');
+const { ApolloServer } = require('apollo-server-express');
 require('dotenv').config();
 
+// Импортируем локальные модули
 const db = require('./db');
-const models = require('./models');
+const typeDefs = require('./schema');
+const resolvers = require('./resolvers');
 
 // Запускаем сервер на порте, указанном в файле .env, или на порте 4000
 const port = process.env.PORT || 4000;
 
 // Сохраняем значение DB_HOST в виде переменной
 const DB_HOST = process.env.DB_HOST;
-
-// Строим схему, используя язык схем GraphQL
-const typeDefs = gql`
-  type Note {
-    id: ID!
-    content: String!
-    author: String!
-  }
-  
-  type Query {
-    hello: String
-    notes: [Note!]!
-    note(id: ID!): Note!
-  }
-  
-  type Mutation {
-    newNote(content: String!): Note!
-  }
-`;
-
-// Предоставляем функцию-распознователь для полей схемы
-const resolvers = {
-  Query: {
-    hello: () => 'Привет',
-    notes: () => models.Note.find(), // async await
-    note: (parent, args) => models.Note.findById(args.id) // args - Аргументы, передаваемые пользователем в запросе
-  },
-
-  Mutation: {
-    newNote: async (parent, args) => {
-      return await models.Note.create({
-        content: args.content,
-        author: 'Serj Norvaishas'
-      });
-    }
-  }
-
-};
 
 const app = express();
 
