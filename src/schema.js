@@ -17,5 +17,7 @@ type Note {
   
   type Mutation {
     newNote(content: String!): Note!
+    updateNote(id: ID!, content: String!): Note!
+    deleteNote(id: ID!): Boolean!
   }
 `;
