@@ -1,4 +1,3 @@
-const models = require('../models');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { AuthenticationError, ForbiddenError } = require('apollo-server-express');
@@ -7,13 +6,13 @@ require('dotenv').config();
 const gravatar = require('../util/gravatar');
 
 module.exports = {
-  newNote: async (parent, args) => {
+  newNote: async (parent, args, { models }) => {
     return await models.Note.create({
       content: args.content,
       author: 'Serj Norvaishas'
     });
   },
-  deleteNote: async (parent, args) => {
+  deleteNote: async (parent, args, { models }) => {
     try {
       await models.Note.findOneAndRemove({_id: args.id});
       return true;
@@ -21,7 +20,7 @@ module.exports = {
       return false;
     }
   },
-  updateNote: async (parent, {content, id}) => {
+  updateNote: async (parent, {content, id}, { models }) => {
     await models.Note.findOneAndUpdate(
       {_id: id},
       {
@@ -29,7 +28,7 @@ module.exports = {
       }
     )
   },
-  signUp: async (parent, { username, email, password }) => {
+  signUp: async (parent, { username, email, password }, { models }) => {
     email = email.trim().toLowerCase();
     // Хэшируем пароль
     const hashed = await bcrypt.hash(password, 10);
@@ -51,7 +50,7 @@ module.exports = {
       throw new Error('Error creating account');
     }
   },
-  signIn: async (parent, { username, email, password }) => {
+  signIn: async (parent, { username, email, password }, { models }) => {
     if (email) {
       email = email.trim().toLowerCase();
     }
