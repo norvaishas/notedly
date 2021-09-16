@@ -1,15 +1,22 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { AuthenticationError, ForbiddenError } = require('apollo-server-express');
+const mongoose = require('mongoose');
 require('dotenv').config();
 
 const gravatar = require('../util/gravatar');
 
 module.exports = {
-  newNote: async (parent, args, { models }) => {
+  // Добавляем контекст пользователя
+  newNote: async (parent, args, { models, user }) => {
+    // Если в контексте нет пользователя, выбрасываем ошибку аутентификации
+    if (!user) {
+      throw AuthenticationError('You must be signed in to create a note')
+    }
     return await models.Note.create({
       content: args.content,
-      author: 'Serj Norvaishas'
+      // Ссылаемся на mongo id автора
+      author: mongoose.Types.ObjectId(user.id)
     });
   },
   deleteNote: async (parent, args, { models }) => {

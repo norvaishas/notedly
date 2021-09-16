@@ -9,7 +9,9 @@ const noteSchema = new mongoose.Schema(
       required: true
     },
     author: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      // type: mongoose.Schema.ObjectId, // так тоже работает (без Types)
+      ref: 'User',
       required: true
     }
   },
