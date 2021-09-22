@@ -19,22 +19,49 @@ module.exports = {
       author: mongoose.Types.ObjectId(user.id)
     });
   },
-  deleteNote: async (parent, args, { models }) => {
+
+  deleteNote: async (parent, args, { models, user }) => {
+    if (!user) {
+      throw AuthenticationError('You must be signed in to delete a note')
+    }
+    // Находим заметку
+    const note = await models.Note.findById(args.id);
+    // Если владелец заметки и текущий юзер не совпадают, выбрасываем запрет на действие
+    if (note && String(note.author) !== user.id) {
+      throw new ForbiddenError('You dont have permissions to delete the note');
+    }
     try {
-      await models.Note.findOneAndRemove({_id: args.id});
+      // Если все проверки проходят, удаляем заметку
+      await note.remove();
       return true;
     } catch (err) {
+      // Если в процессе возникает ошибка, возвращаем false
       return false;
     }
   },
-  updateNote: async (parent, {content, id}, { models }) => {
-    await models.Note.findOneAndUpdate(
-      {_id: id},
+
+  updateNote: async (parent, {content, id}, { models, user }) => {
+    if (!user) {
+      throw AuthenticationError('You must be signed in to update a note')
+    }
+    const note = await models.Note.findById(id);
+    if (note && String(note.author) !== user.id) {
+      throw new ForbiddenError('You don\'t have permissions to update the note');
+    }
+    // Обновляем заметку в БД и возвращаем ее в обновленном виде
+    return await models.Note.findOneAndUpdate(
+      {
+        _id: id
+      },
       {
         $set: {content}
+      },
+      {
+        new: true
       }
     )
   },
+
   signUp: async (parent, { username, email, password }, { models }) => {
     email = email.trim().toLowerCase();
     // Хэшируем пароль
@@ -57,6 +84,7 @@ module.exports = {
       throw new Error('Error creating account');
     }
   },
+
   signIn: async (parent, { username, email, password }, { models }) => {
     if (email) {
       email = email.trim().toLowerCase();
