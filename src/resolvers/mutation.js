@@ -103,5 +103,49 @@ module.exports = {
     }
     // Создаем и возвращаем json web token
     return jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+  },
+
+  toggleFavorite: async (parent, { id }, { models, user }) => {
+    if (!user) {
+      throw new AuthenticationError('error');
+    }
+    // Проверяем, отмечал ли юзер заметку как избранную
+    let noteCheck = await models.Note.findById(id);
+    const hasUser = noteCheck.favoritedBy.indexOf(user.id);
+
+    //Если юзер есть в списке, удаляем его оттуда и уменьшаем favoritesCount на 1
+    if (hasUser >= 0) {
+      return await models.Note.findByIdAndUpdate(
+        id,
+        {
+          $pull: {
+            favoritedBy: mongoose.Types.ObjectId(user.id)
+          },
+          $inc: {
+            favoriteCount: -1
+          }
+        },
+        {
+          // Устанавливаем как trueб чтобы вернуть обновленный документ
+          new: true
+        }
+      );
+    } else {
+      // Если пользователя в списке нет, добавляем его туда и увеличиваем favoriteCount на 1
+      return await models.Note.findByIdAndUpdate(
+        id,
+        {
+          $push: {
+            favoritedBy: mongoose.Types.ObjectId(user.id)
+          },
+          $inc: {
+            favoriteCount: 1
+          }
+        },
+        {
+          new: true
+        }
+      );
+    }
   }
 };
