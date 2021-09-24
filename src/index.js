@@ -2,6 +2,8 @@ const express = require('express');
 const { ApolloServer } = require('apollo-server-express');
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
+const helmet = require('helmet');
+const cors = require('cors');
 
 // Импортируем локальные модули
 const db = require('./db');
@@ -16,6 +18,11 @@ const port = process.env.PORT || 4000;
 const DB_HOST = process.env.DB_HOST;
 
 const app = express();
+
+// Добавляем промежуточное ПО в начало стека
+app.use(helmet());
+// добавляем промежуточное ПО после app.use(helmet());
+app.use(cors());
 
 // Подключаем БД
 db.connect(DB_HOST);
