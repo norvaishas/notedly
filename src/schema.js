@@ -22,7 +22,7 @@ module.exports = gql`
     createdAt: DateTime!
     updatedAt: DateTime!
     favoriteCount: Int!
-    favoritedBy: [User!]
+    favoritedBy: [User]
   }
   
   type NoteFeed {

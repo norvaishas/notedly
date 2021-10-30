@@ -11,7 +11,7 @@ module.exports = {
   newNote: async (parent, args, { models, user }) => {
     // Если в контексте нет пользователя, выбрасываем ошибку аутентификации
     if (!user) {
-      throw AuthenticationError('You must be signed in to create a note')
+      throw new AuthenticationError('You must be signed in to create a note')
     }
     return await models.Note.create({
       content: args.content,
@@ -22,7 +22,7 @@ module.exports = {
 
   deleteNote: async (parent, args, { models, user }) => {
     if (!user) {
-      throw AuthenticationError('You must be signed in to delete a note')
+      throw new AuthenticationError('You must be signed in to delete a note')
     }
     // Находим заметку
     const note = await models.Note.findById(args.id);
@@ -42,7 +42,7 @@ module.exports = {
 
   updateNote: async (parent, {content, id}, { models, user }) => {
     if (!user) {
-      throw AuthenticationError('You must be signed in to update a note')
+      throw new AuthenticationError('You must be signed in to update a note')
     }
     const note = await models.Note.findById(id);
     if (note && String(note.author) !== user.id) {
